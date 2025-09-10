@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+void main() {
+  runApp(AbecedarioApp());
+}
+
+class AbecedarioApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Aprende con las Letras',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MenuPage(),
+    );
+  }
+}
+
+/// =====================
+///  MENÚ PRINCIPAL
+/// =====================
+class MenuPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Aprende con las Letras")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              child: Text("Vocales"),
+              onPressed: () {
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => VocalesPage()));
+              },
+            ),
+            ElevatedButton(
+              child: Text("Abecedario"),
+              onPressed: () {
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => AbecedarioPage()));
+              },
+            ),
+            ElevatedButton(
+              child: Text("Juegos"),
+              onPressed: () {
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => JuegoPage()));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// =====================
+///  PANTALLA DE VOCALES
+/// =====================
+class VocalesPage extends StatelessWidget {
+  final List<String> vocales = ["A", "E", "I", "O", "U"];
+  final player = AudioPlayer();
+
+  void _playSound(String letra) {
+    player.play(AssetSource("sounds/${letra.toLowerCase()}.mp3"));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Vocales")),
+      body: GridView.count(
+        crossAxisCount: 2,
+        children: vocales.map((vocal) {
+          return GestureDetector(
+            onTap: () => _playSound(vocal),
+            child: Card(
+              color: Colors.orangeAccent,
+              child: Center(
+                child: Text(
+                  vocal,
+                  style: TextStyle(fontSize: 100, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+/// =====================
+///  PANTALLA DEL ABECEDARIO
+/// =====================
+class AbecedarioPage extends StatelessWidget {
+  final List<String> letras = 
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+  final player = AudioPlayer();
+
+  void _playSound(String letra) {
+    player.play(AssetSource("sounds/${letra.toLowerCase()}.mp3"));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Abecedario")),
+      body: GridView.count(
+        crossAxisCount: 4,
+        children: letras.map((letra) {
+          return GestureDetector(
+            onTap: () => _playSound(letra),
+            child: Card(
+              color: Colors.lightBlueAccent,
+              child: Center(
+                child: Text(
+                  letra,
+                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+/// =====================
+///  PANTALLA DE JUEGO
+/// =====================
+class JuegoPage extends StatefulWidget {
+  @override
+  _JuegoPageState createState() => _JuegoPageState();
+}
+
+class _JuegoPageState extends State<JuegoPage> {
+  String palabra = "_asa";  // ejemplo de "Casa"
+  String letraCorrecta = "C";
+  bool completado = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Juego: Completa la palabra")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(palabra, style: TextStyle(fontSize: 60)),
+            SizedBox(height: 40),
+
+            // Zona donde arrastrar
+            DragTarget<String>(
+              onAccept: (value) {
+                if (value == letraCorrecta) {
+                  setState(() {
+                    palabra = "Casa";
+                    completado = true;
+                  });
+                }
+              },
+              builder: (context, candidateData, rejectedData) {
+                return Container(
+                  width: 120,
+                  height: 120,
+                  color: Colors.grey[300],
+                  child: Center(
+                    child: Text(
+                      completado ? letraCorrecta : "?",
+                      style: TextStyle(fontSize: 50),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            SizedBox(height: 40),
+
+            // Letras para arrastrar
+            Wrap(
+              spacing: 20,
+              children: ["A", "C", "M", "L"].map((letra) {
+                return Draggable<String>(
+                  data: letra,
+                  feedback: Material(
+                    child: Text(letra,
+                      style: TextStyle(fontSize: 50, color: Colors.red)),
+                  ),
+                  childWhenDragging: Text(letra,
+                      style: TextStyle(fontSize: 40, color: Colors.grey)),
+                  child: Text(letra,
+                      style: TextStyle(fontSize: 40, color: Colors.black)),
+                );
+              }).toList(),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
